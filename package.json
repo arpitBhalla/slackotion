@@ -1,0 +1,12 @@
+{
+  "name": "notion-slack",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "MIT",
+  "description": "Notion sync with SLack",
+  "author": "Arpit Bhalla <arpitbhalla+npm@icloud.com>",
+  "private": false,
+  "dependencies": {
+    "@slack/bolt": "^3.12.2"
+  }
+}
