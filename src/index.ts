@@ -1,8 +1,12 @@
+// @ts-nocheck
+
 import { App, LogLevel } from "@slack/bolt";
 import { env } from "./core";
 // @ts-ignore
 import fetch from "node-fetch";
 import { db } from "./dbData";
+
+import { Client } from "@notionhq/client";
 
 const app = new App({
   token: env.token,
@@ -64,13 +68,13 @@ const app = new App({
           }
         ).then((res: any) => res.json());
 
-        if (notionTokenResponse?.access_token)
-          await app.client.chat.postEphemeral({
-            text: "Login done, you can use the app now",
-            thread_ts: state.t,
-            channel: state.c,
-            user: state.u,
-          });
+        if (!notionTokenResponse?.access_token) return res.end("Login Failed");
+        await app.client.chat.postEphemeral({
+          text: "Login done, you can use the app now",
+          thread_ts: state.t,
+          channel: state.c,
+          user: state.u,
+        });
 
         console.log(notionTokenResponse);
         db.set(state.u, notionTokenResponse);
@@ -110,7 +114,7 @@ app.event("app_mention", async ({ event, context, client, say }) => {
         JSON.stringify({ u: user, t: thread_ts, c: channel })
       ).toString("base64")
     );
-    console.log(redirectURL);
+
     client.chat.postEphemeral({
       channel,
       thread_ts,
@@ -146,6 +150,19 @@ app.event("app_mention", async ({ event, context, client, say }) => {
     ts: thread_ts,
     channel,
   });
+  const notion = new Client({ auth: context.notion.access_token });
+
+  notion.pages.create({
+    // parent: { database_id: context.notion.workspace_id },
+    content: [
+      {
+        paragraph: {
+          rich_text: [{ text: { content: "de" } }],
+        },
+      },
+    ],
+  });
+
   client.chat.postEphemeral({
     channel,
     thread_ts,
@@ -168,10 +185,10 @@ app.use(async function ({ context, next, body, client }) {
   // @ts-ignore
   const userId = body.event.user;
 
-  const notionToken = db.get(userId);
+  const notion = db.get(userId);
 
-  context.notionToken = notionToken;
-  context.isLogin = !!notionToken;
+  context.notion = notion;
+  context.isLogin = !!notion;
 
   next();
 });
