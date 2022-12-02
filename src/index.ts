@@ -1,24 +1,8 @@
 import { App, LogLevel } from "@slack/bolt";
-import axios from "axios";
 import { env } from "./core";
-// import https from 'https'
-
-const dbData: Record<string, string> = {};
-const db = {
-  set(key = "", value = "") {
-    dbData[key] = value;
-  },
-  get(key = "") {
-    return dbData[key];
-  },
-};
-
-declare module "@slack/bolt" {
-  interface Context {
-    notionToken: string;
-    isLogin: boolean;
-  }
-}
+// @ts-ignore
+import fetch from "node-fetch";
+import { db } from "./dbData";
 
 const app = new App({
   token: env.token,
@@ -54,36 +38,33 @@ const app = new App({
         const params = new URLSearchParams(req.url?.split("?")[1]);
         console.log("/redirect", params);
 
-        const state = JSON.parse(params.get("state") ?? "");
+        const stateBuffer = Buffer.from(
+          params.get("state") ?? "",
+          "base64"
+        ).toString("ascii");
+
+        const state = JSON.parse(stateBuffer);
         const code = params.get("code")!;
 
-        const notionTokenResponse = await axios
-          .post(
-            "https://api.notion.com/v1/oauth/token",
-            {
+        const notionTokenResponse = await fetch(
+          "https://api.notion.com/v1/oauth/token",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              grant_type: "authorization_code",
               code,
               redirect_uri: env.base_url + "/redirect",
-              grant_type: "authorization_code",
+            }),
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Basic ${Buffer.from(
+                `${env.auth_client_id}:${env.auth_client_secret}`
+              ).toString("base64")}`,
             },
-            {
-              // responseType: "arraybuffer",
-              responseEncoding: "utf8",
-              responseType: "json",
-              // responseEncoding: "binary",
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                Authorization:
-                  "Basic " +
-                  Buffer.from(
-                    `${env.auth_client_id}:${env.auth_client_secret}`
-                  ).toString("base64"),
-              },
-            }
-          )
-          .catch((e) => e);
+          }
+        ).then((res: any) => res.json());
 
-        if (notionTokenResponse.data)
+        if (notionTokenResponse?.access_token)
           await app.client.chat.postEphemeral({
             text: "Login done, you can use the app now",
             thread_ts: state.t,
@@ -91,15 +72,12 @@ const app = new App({
             user: state.u,
           });
 
-        // const decoder = new TextDecoder("ISO-8859-1");
-        // let html = decoder.decode(notionTokenResponse.data);
-
         console.log(notionTokenResponse);
+        db.set(state.u, notionTokenResponse);
 
-        // db.set(state.u, notionTokenResponse as string);
-        console.log(dbData);
-
-        res.end("done");
+        res.end(
+          "<html><head><title>Sync with Slack</title></head><body><center><h1>App added successfully</h1><h3>You can close this tab</h3></center></body></html>"
+        );
       },
     },
   ],
@@ -128,8 +106,11 @@ app.event("app_mention", async ({ event, context, client, say }) => {
     redirectURL.searchParams.set("response_type", "code");
     redirectURL.searchParams.set(
       "state",
-      JSON.stringify({ u: user, t: thread_ts, c: channel })
+      Buffer.from(
+        JSON.stringify({ u: user, t: thread_ts, c: channel })
+      ).toString("base64")
     );
+    console.log(redirectURL);
     client.chat.postEphemeral({
       channel,
       thread_ts,
@@ -186,8 +167,6 @@ app.event("app_mention", async ({ event, context, client, say }) => {
 app.use(async function ({ context, next, body, client }) {
   // @ts-ignore
   const userId = body.event.user;
-
-  console.log(dbData);
 
   const notionToken = db.get(userId);
 
