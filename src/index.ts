@@ -1,6 +1,15 @@
-import { App, LogLevel, AppMentionEvent } from "@slack/bolt";
+import { App, LogLevel } from "@slack/bolt";
 import { env } from "./core";
-import fs from "fs";
+
+const dbData: Record<string, string> = {};
+const db = {
+  set(key = "", value = "") {
+    dbData[key] = value;
+  },
+  get(key = "") {
+    return dbData[key];
+  },
+};
 
 declare module "@slack/bolt" {
   interface Context {
@@ -14,13 +23,41 @@ const app = new App({
   appToken: env.appToken,
   signingSecret: env.signingSecret,
   logLevel: env.isDebug ? LogLevel.DEBUG : LogLevel.ERROR,
+  customRoutes: [
+    {
+      path: "/login",
+      method: ["GET"],
+      handler(req, res) {
+        console.log("/login");
+        res.statusCode = 302;
+        const url = new URL(env.base_url + req.url!);
+        const user = url.searchParams.get("user")!;
+        res.setHeader(
+          "location",
+          `${env.base_url}/redirect?user=${user}&notionToken=myFakeToken`
+        );
+        res.end();
+      },
+    },
+    {
+      path: "/redirect",
+      method: ["GET"],
+      handler(req, res) {
+        console.log("/redirect");
+
+        const url = new URL(env.base_url + req.url!);
+        const user = url.searchParams.get("user")!;
+        console.log("user", user);
+        const notionToken = url.searchParams.get("notionToken")!;
+        db.set(user, notionToken);
+
+        res.end("done");
+      },
+    },
+  ],
 });
 
 (async () => await app.start(env.port).then(() => console.log("Started")))();
-
-let isLoggedIn = false;
-
-const isLogin = (user: AppMentionEvent["user"]) => isLoggedIn;
 
 app.event("app_mention", async ({ event, context, client, say }) => {
   const { user, channel, thread_ts } = event;
@@ -34,7 +71,8 @@ app.event("app_mention", async ({ event, context, client, say }) => {
     });
     return;
   }
-  if (context.isLogin) {
+
+  if (!context.isLogin) {
     client.chat.postEphemeral({
       channel,
       thread_ts,
@@ -57,7 +95,7 @@ app.event("app_mention", async ({ event, context, client, say }) => {
                 text: "Login to Notion",
                 emoji: true,
               },
-              url: "https://www.notion.so/login",
+              url: `${env.base_url}/login?user=${user}`,
               //   action_id: "login_with_notion",
               //   value: "done",
             },
@@ -90,12 +128,16 @@ app.event("app_mention", async ({ event, context, client, say }) => {
   });
 });
 
-app.use(async function ({ context, next, body }) {
-  const userId = body.user;
+app.use(async function ({ context, next, body, client }) {
+  // @ts-ignore
+  const userId = body.event.user;
 
-  console.log(userId);
-  context.notionToken = "demo_token";
-  context.isLogin = true;
+  console.log(dbData);
+
+  const notionToken = db.get(userId);
+
+  context.notionToken = notionToken;
+  context.isLogin = !!notionToken;
 
   next();
 });
