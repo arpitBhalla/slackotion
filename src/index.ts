@@ -1,5 +1,7 @@
 import { App, LogLevel } from "@slack/bolt";
+import axios from "axios";
 import { env } from "./core";
+// import https from 'https'
 
 const dbData: Record<string, string> = {};
 const db = {
@@ -24,32 +26,78 @@ const app = new App({
   signingSecret: env.signingSecret,
   logLevel: env.isDebug ? LogLevel.DEBUG : LogLevel.ERROR,
   customRoutes: [
-    {
-      path: "/login",
-      method: ["GET"],
-      handler(req, res) {
-        console.log("/login");
-        res.statusCode = 302;
-        const url = new URL(env.base_url + req.url!);
-        const user = url.searchParams.get("user")!;
-        res.setHeader(
-          "location",
-          `${env.base_url}/redirect?user=${user}&notionToken=myFakeToken`
-        );
-        res.end();
-      },
-    },
+    // {
+    //   path: "/login",
+    //   method: ["GET"],
+    //   handler(req, res) {
+    //     console.log(req.url);
+    //     const user = new URLSearchParams(req.url?.split("?")[1]).get("user");
+    //     if (!user) return res.end("Invalid User");
+    //     const redirectURL = new URL(env.auth_base_url!);
+    //     redirectURL.searchParams.set("client_id", env.auth_client_id!);
+    //     redirectURL.searchParams.set(
+    //       "redirect_uri",
+    //       env.base_url + "/redirect"
+    //     );
+    //     redirectURL.searchParams.set("response_type", "code");
+    //     redirectURL.searchParams.set("state", user);
+
+    //     res.statusCode = 302;
+    //     res.setHeader("location", redirectURL.href);
+    //     res.end();
+    //   },
+    // },
     {
       path: "/redirect",
       method: ["GET"],
-      handler(req, res) {
-        console.log("/redirect");
+      async handler(req, res) {
+        const params = new URLSearchParams(req.url?.split("?")[1]);
+        console.log("/redirect", params);
 
-        const url = new URL(env.base_url + req.url!);
-        const user = url.searchParams.get("user")!;
-        console.log("user", user);
-        const notionToken = url.searchParams.get("notionToken")!;
-        db.set(user, notionToken);
+        const state = JSON.parse(params.get("state") ?? "");
+        const code = params.get("code")!;
+
+        const notionTokenResponse = await axios
+          .post(
+            "https://api.notion.com/v1/oauth/token",
+            {
+              code,
+              redirect_uri: env.base_url + "/redirect",
+              grant_type: "authorization_code",
+            },
+            {
+              // responseType: "arraybuffer",
+              responseEncoding: "utf8",
+              responseType: "json",
+              // responseEncoding: "binary",
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                Authorization:
+                  "Basic " +
+                  Buffer.from(
+                    `${env.auth_client_id}:${env.auth_client_secret}`
+                  ).toString("base64"),
+              },
+            }
+          )
+          .catch((e) => e);
+
+        if (notionTokenResponse.data)
+          await app.client.chat.postEphemeral({
+            text: "Login done, you can use the app now",
+            thread_ts: state.t,
+            channel: state.c,
+            user: state.u,
+          });
+
+        // const decoder = new TextDecoder("ISO-8859-1");
+        // let html = decoder.decode(notionTokenResponse.data);
+
+        console.log(notionTokenResponse);
+
+        // db.set(state.u, notionTokenResponse as string);
+        console.log(dbData);
 
         res.end("done");
       },
@@ -61,22 +109,31 @@ const app = new App({
 
 app.event("app_mention", async ({ event, context, client, say }) => {
   const { user, channel, thread_ts } = event;
-  console.log("Mentioned");
+  console.log("Mentioned by", user);
 
+  if (!user) return;
   if (!thread_ts) {
     client.chat.postEphemeral({
       text: "Hey, I work only for threads",
       channel,
-      user: user!,
+      user,
     });
     return;
   }
 
   if (!context.isLogin) {
+    const redirectURL = new URL(env.auth_base_url!);
+    redirectURL.searchParams.set("client_id", env.auth_client_id!);
+    redirectURL.searchParams.set("redirect_uri", env.base_url + "/redirect");
+    redirectURL.searchParams.set("response_type", "code");
+    redirectURL.searchParams.set(
+      "state",
+      JSON.stringify({ u: user, t: thread_ts, c: channel })
+    );
     client.chat.postEphemeral({
       channel,
       thread_ts,
-      user: event.user!,
+      user,
       blocks: [
         {
           type: "section",
@@ -95,9 +152,7 @@ app.event("app_mention", async ({ event, context, client, say }) => {
                 text: "Login to Notion",
                 emoji: true,
               },
-              url: `${env.base_url}/login?user=${user}`,
-              //   action_id: "login_with_notion",
-              //   value: "done",
+              url: redirectURL.toString(),
             },
           ],
         },
@@ -107,13 +162,13 @@ app.event("app_mention", async ({ event, context, client, say }) => {
   }
 
   const threadChat = await client.conversations.replies({
-    ts: thread_ts!,
+    ts: thread_ts,
     channel,
   });
   client.chat.postEphemeral({
     channel,
     thread_ts,
-    user: user!,
+    user,
     text: `Saved ${
       threadChat.messages!.length
     } messages to Notion. here is the link https://notion.so/arpit`,

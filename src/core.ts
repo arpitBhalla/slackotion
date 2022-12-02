@@ -9,4 +9,8 @@ export const env = {
   appToken: process.env.SLACK_APP_TOKEN,
 
   base_url: process.env.DEPLOY_URL,
+
+  auth_base_url: process.env.AUTH_BASE_URL,
+  auth_client_id: process.env.AUTH_CLIENT_ID,
+  auth_client_secret: process.env.AUTH_CLIENT_SECRET,
 };
