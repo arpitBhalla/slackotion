@@ -1,5 +1,11 @@
+import * as dotenv from "dotenv";
+dotenv.config();
+
 export const env = {
   isDebug: process.env.DEBUG ?? false,
-  signingSecret: process.env.SIGNING_SECRET ?? "",
-  token: process.env.TOKEN ?? "",
+  port: process.env.PORT ?? "",
+
+  token: process.env.SLACK_BOT_TOKEN,
+  signingSecret: process.env.SLACK_SIGNING_SECRET,
+  appToken: process.env.SLACK_APP_TOKEN,
 };

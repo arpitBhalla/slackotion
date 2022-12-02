@@ -7,6 +7,10 @@
   "author": "Arpit Bhalla <arpitbhalla+npm@icloud.com>",
   "private": false,
   "dependencies": {
-    "@slack/bolt": "^3.12.2"
+    "@slack/bolt": "^3.12.2",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1"
   }
 }
