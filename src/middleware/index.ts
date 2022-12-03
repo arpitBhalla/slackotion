@@ -8,10 +8,10 @@ import { db } from "../utils/db";
 const app_mention: Middleware<
   SlackEventMiddlewareArgs<"app_mention">,
   StringIndexed
-> = async ({ event, next, context }) => {
+> = async ({ event, next, context, client }) => {
   const authRes = await checkAuth(
     { user: event.user, channel: event.channel, thread_ts: event.thread_ts },
-    context.client
+    client
   );
   if (authRes?.notion_access_token) {
     context.notion_access_token = authRes.notion_access_token;

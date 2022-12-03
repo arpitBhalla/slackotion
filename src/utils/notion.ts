@@ -12,22 +12,35 @@ export class NotionClient extends Client {
 
     return res.results[0].id;
   }
-  async createNotionPage(database_id: string) {
+  async createNotionPage(database_id: string, title: string, content: string) {
     const res = await this.pages.create({
       parent: { database_id },
       properties: {
-        ID: {
+        title: {
           type: "title",
           title: [
             {
               type: "text",
               text: {
-                content: "username",
+                content: title,
               },
             },
           ],
         },
       },
+      children: [
+        {
+          paragraph: {
+            rich_text: [
+              {
+                text: {
+                  content,
+                },
+              },
+            ],
+          },
+        },
+      ],
     });
     return res;
   }

@@ -26,22 +26,18 @@ export const app_mention: Middleware<
   });
   const notion = new NotionClient(context.notion_access_token);
 
-  notion.createNotionPage(context.notion_database_id);
+  await notion.createNotionPage(
+    context.notion_database_id,
+    threadChat.messages![0].text!,
+    threadChat.messages
+      ?.map((m) => `[${m.ts}] ${m.user} : ${m.text}`)
+      .join("\n")!
+  );
 
   client.chat.postEphemeral({
     channel,
     thread_ts,
     user,
-    text: `Saved ${
-      threadChat.messages!.length
-    } messages to Notion. here is the link https://notion.so/arpit`,
+    text: `Saved ${threadChat.messages!.length} messages to Notion`,
   });
-
-  // await say({
-  //   thread_ts,
-  //   text:
-  //     "Here is summary of chat\n ```" +
-  //     threadChat.messages?.map((e) => e.text).join("\n") +
-  //     "```",
-  // });
 };
