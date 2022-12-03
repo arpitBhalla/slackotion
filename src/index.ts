@@ -5,9 +5,9 @@ import { middleware } from "./middleware";
 import { notionRedirectHandler } from "./routes/redirect-notion";
 
 const app = new App({
-  token: env.token,
-  appToken: env.appToken,
-  signingSecret: env.signingSecret,
+  token: env.slack_bot_token,
+  appToken: env.slack_app_token,
+  signingSecret: env.slack_signing_secret,
   logLevel: env.isDebug ? LogLevel.DEBUG : LogLevel.ERROR,
   customRoutes: [
     {

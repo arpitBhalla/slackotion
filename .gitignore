@@ -3,3 +3,6 @@ dist
 .env
 db.json
 .vercel
+
+.env.dev
+.env.prod

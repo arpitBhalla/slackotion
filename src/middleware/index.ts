@@ -43,8 +43,8 @@ const checkAuth = async function (
     t: thread_ts,
     c: channel,
   };
-  const redirectURL = new URL(env.auth_base_url!);
-  redirectURL.searchParams.set("client_id", env.auth_client_id!);
+  const redirectURL = new URL(env.notion_auth_base_url!);
+  redirectURL.searchParams.set("client_id", env.notion_client_id!);
   redirectURL.searchParams.set("redirect_uri", env.base_url + "/redirect");
   redirectURL.searchParams.set("response_type", "code");
   redirectURL.searchParams.set(

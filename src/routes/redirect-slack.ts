@@ -1,12 +1,8 @@
-// https://slack-notion.onrender.com/redirect/slack?
-// code=2559442987462.4463303231922.58466ea461a6f922e7541bc0ba18497cae7d88b66352154eacc2cae2a4fc16bc&state=
-
 import { env } from "../core/env";
 import { CustomRoute } from "@slack/bolt";
 import fetch from "node-fetch";
-import { db } from "../utils/db";
 import { NotionClient } from "../utils/notion";
-import { SlackRedirectResponse, NotionLoginStatePayload } from "../types";
+import { SlackRedirectResponse } from "../types";
 
 export const notionRedirectHandler: CustomRoute["handler"] = async (
   req,
@@ -21,14 +17,14 @@ export const notionRedirectHandler: CustomRoute["handler"] = async (
     method: "POST",
     body: JSON.stringify({
       code,
-      client_id: env.auth_client_id,
-      client_secret: env.auth_client_secret,
+      client_id: env.notion_client_id,
+      client_secret: env.notion_client_secret,
       redirect_uri: env.base_url + "/redirect-slack",
     }),
     headers: {
       "Content-Type": "application/json",
       Authorization: `Basic ${Buffer.from(
-        `${env.auth_client_id}:${env.auth_client_secret}`
+        `${env.notion_client_id}:${env.notion_client_secret}`
       ).toString("base64")}`,
     },
   }).then((res: any) => res.json())) as SlackRedirectResponse;

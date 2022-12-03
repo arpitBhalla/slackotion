@@ -29,7 +29,7 @@ export const notionRedirectHandler: CustomRoute["handler"] = async (
     headers: {
       "Content-Type": "application/json",
       Authorization: `Basic ${Buffer.from(
-        `${env.auth_client_id}:${env.auth_client_secret}`
+        `${env.notion_client_id}:${env.notion_client_secret}`
       ).toString("base64")}`,
     },
   }).then((res: any) => res.json())) as NotionRedirectResponse;

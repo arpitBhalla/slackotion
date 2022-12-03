@@ -3,14 +3,19 @@ dotenv.config();
 
 export const env = {
   isDebug: process.env.DEBUG ?? false,
-  port: process.env.PORT ?? "",
-  token: process.env.SLACK_BOT_TOKEN,
-  signingSecret: process.env.SLACK_SIGNING_SECRET,
-  appToken: process.env.SLACK_APP_TOKEN,
 
   base_url: process.env.DEPLOY_URL,
+  port: process.env.PORT ?? "8080",
 
-  auth_base_url: process.env.AUTH_BASE_URL,
-  auth_client_id: process.env.AUTH_CLIENT_ID,
-  auth_client_secret: process.env.AUTH_CLIENT_SECRET,
+  slack_bot_token: process.env.SLACK_BOT_TOKEN,
+
+  slack_signing_secret: process.env.SLACK_SIGNING_SECRET,
+  slack_app_token: process.env.SLACK_APP_TOKEN,
+
+  slack_client_id: process.env.SLACK_CLIENT_ID,
+  slack_client_secret: process.env.SLACK_CLIENT_SECRET,
+
+  notion_auth_base_url: process.env.NOTION_AUTH_BASE_URL,
+  notion_client_id: process.env.NOTION_CLIENT_ID,
+  notion_client_secret: process.env.NOTION_CLIENT_SECRET,
 };
