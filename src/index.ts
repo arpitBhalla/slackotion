@@ -1,12 +1,11 @@
 import { App, LogLevel } from "@slack/bolt";
 import { env } from "./core/env";
-import { logout_command } from "./commands/logout";
-import { save_command } from "./commands/save";
-import { select_command } from "./commands/select";
+import Actions, * as actions from "./actions";
 import { app_mention } from "./events/app_mention";
 import { middleware } from "./middleware";
 import { globalMiddleware } from "./middleware/global";
 import { notionRedirectHandler } from "./routes/redirect-notion";
+import Commands, * as commands from "./commands";
 
 import { SlackInstallationStore } from "./utils/slack-installation";
 
@@ -39,9 +38,11 @@ app.use(globalMiddleware);
 
 app.event("app_mention", middleware.app_mention, app_mention);
 
-app.command("/save", save_command);
-app.command("/select", select_command);
-app.command("/logout", logout_command);
+app.command(Commands.save, commands.save);
+app.command(Commands.select, commands.select);
+app.command(Commands.logout, commands.logout);
+
+app.action(Actions.select_db, actions.select);
 
 async function main() {
   await app.start(env.port).then(() => console.log("Started"));
