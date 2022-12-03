@@ -43,6 +43,7 @@ class prismaDb extends PrismaClient {
     });
   }
   getUser(user_id: string) {
+    if (!user_id) return;
     return this.user.findFirst({
       where: {
         slack_user_id: user_id,

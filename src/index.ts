@@ -1,12 +1,10 @@
 import { App, LogLevel } from "@slack/bolt";
 import { env } from "./core/env";
 import Actions, * as actions from "./actions";
+import Commands, * as commands from "./commands";
 import { app_mention } from "./events/app_mention";
-import { middleware } from "./middleware";
 import { globalMiddleware } from "./middleware/global";
 import { notionRedirectHandler } from "./routes/redirect-notion";
-import Commands, * as commands from "./commands";
-
 import { SlackInstallationStore } from "./utils/slack-installation";
 
 export const app = new App({
@@ -36,13 +34,20 @@ export const app = new App({
 });
 app.use(globalMiddleware);
 
-app.event("app_mention", middleware.app_mention, app_mention);
+app.event("app_mention", app_mention);
 
 app.command(Commands.save, commands.save);
 app.command(Commands.select, commands.select);
 app.command(Commands.logout, commands.logout);
 
 app.action(Actions.select_db, actions.select);
+
+app.action("approve_button", async ({ ack }) => {
+  await ack();
+
+  console.log("approve_button");
+  // Update the message to reflect the action
+});
 
 async function main() {
   await app.start(env.port).then(() => console.log("Started"));

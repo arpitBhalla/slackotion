@@ -5,11 +5,13 @@ export class NotionClient extends Client {
     super({ auth: token });
     this.search;
   }
-  async getUserNotionDB() {
-    const res = await this.search({
+  async getUserAllDB() {
+    return this.search({
       filter: { property: "object", value: "database" },
     });
-
+  }
+  async getUserNotionDB() {
+    const res = await this.getUserAllDB();
     return res.results[0].id;
   }
   async createNotionPage(database_id: string, title: string, content: string) {

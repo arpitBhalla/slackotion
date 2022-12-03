@@ -7,7 +7,6 @@ export const app_mention: Middleware<
   SlackEventMiddlewareArgs<"app_mention">,
   StringIndexed
 > = async ({ event, context, client, say, body }) => {
-  console.log(body);
   const { user, channel, thread_ts } = event;
   console.log("Mentioned by", user);
 

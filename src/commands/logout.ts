@@ -8,9 +8,9 @@ export const logout: Middleware<SlackCommandMiddlewareArgs, StringIndexed> =
 
     await prisma.deleteUser(body.user_id);
 
-    client.chat.postEphemeral({
-      channel: body.user_id,
+    await client.chat.postEphemeral({
+      channel: body.channel_id || body.user_id,
       user: body.user_id,
-      text: "All your notion data has been removed",
+      text: "Logout done! All your notion auth data has been removed",
     });
   };

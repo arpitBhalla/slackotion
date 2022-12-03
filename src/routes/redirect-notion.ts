@@ -42,12 +42,12 @@ export const notionRedirectHandler: CustomRoute["handler"] = async (
   }).then((res: any) => res.json())) as NotionRedirectResponse;
 
   if (!notionResponse?.access_token) return res.end("Login Failed");
-  await app.client.chat.postEphemeral({
-    text: "Login done, you can use the app now",
-    channel: state.u,
-    user: state.u,
-    // thread_ts: state.t,
-  });
+  // await app.client.chat.postEphemeral({
+  //   text: "Login done, you can use the app now",
+  //   channel: state.u,
+  //   user: state.u,
+  //   // thread_ts: state.t,
+  // });
 
   const notion = new NotionClient(notionResponse.access_token);
   const database_id = await notion.getUserNotionDB();
