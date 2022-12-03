@@ -7,7 +7,23 @@ declare module "@slack/bolt" {
   }
 }
 
-export type NotionResponse = {
+export type SlackRedirectResponse = {
+  access_token: string;
+  scope: string;
+  team_name: string;
+  team_id: string;
+  incoming_webhook: {
+    url: string;
+    channel: string;
+    configuration_url: string;
+  };
+  bot: {
+    bot_user_id: string;
+    bot_access_token: string;
+  };
+};
+
+export type NotionRedirectResponse = {
   access_token: string;
   token_type: string;
   bot_id: string;
@@ -24,24 +40,4 @@ export type NotionResponse = {
   duplicated_template_id: any;
 };
 
-export type MiddlewareBody = {
-  token: string;
-  team_id: string;
-  api_app_id: string;
-  event: {
-    client_msg_id: string;
-    type: string;
-    text: string;
-    user: string;
-    ts: string;
-    blocks: ArrayConstructor[];
-    team: string;
-    thread_ts: string;
-    parent_user_id: string;
-    channel: string;
-    event_ts: string;
-  };
-  event_context: string;
-};
-
-export type StatePayload = { u: string; t: string; c: string };
+export type NotionLoginStatePayload = { u: string; t: string; c: string };

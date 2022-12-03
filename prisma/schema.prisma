@@ -1,0 +1,26 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Team {
+  id            Int    @id @default(autoincrement())
+  slack_team_id String @unique
+  slack_bot_id  String
+}
+
+model User {
+  id                  Int    @id @default(autoincrement())
+  slack_user_id       String
+  notion_access_token String
+  notion_database_id  String
+
+  @@index([slack_user_id], name: "slack_user_id")
+}

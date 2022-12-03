@@ -1,11 +1,14 @@
 import { env } from "../core/env";
 import { CustomRoute } from "@slack/bolt";
 import fetch from "node-fetch";
-import { db } from "../utils/db";
+import { db, dbv2 } from "../utils/db";
 import { NotionClient } from "../utils/notion";
-import { StatePayload } from "../types";
+import { NotionRedirectResponse, NotionLoginStatePayload } from "../types";
 
-export const redirectHandler: CustomRoute["handler"] = async (req, res) => {
+export const notionRedirectHandler: CustomRoute["handler"] = async (
+  req,
+  res
+) => {
   const params = new URLSearchParams(req.url?.split("?")[1]);
   console.log("/redirect", params);
 
@@ -13,10 +16,10 @@ export const redirectHandler: CustomRoute["handler"] = async (req, res) => {
     "ascii"
   );
 
-  const state = JSON.parse(stateBuffer) as StatePayload;
+  const state = JSON.parse(stateBuffer) as NotionLoginStatePayload;
   const code = params.get("code")!;
 
-  const notionResponse = await fetch("https://api.notion.com/v1/oauth/token", {
+  const notionResponse = (await fetch("https://api.notion.com/v1/oauth/token", {
     method: "POST",
     body: JSON.stringify({
       grant_type: "authorization_code",
@@ -29,7 +32,7 @@ export const redirectHandler: CustomRoute["handler"] = async (req, res) => {
         `${env.auth_client_id}:${env.auth_client_secret}`
       ).toString("base64")}`,
     },
-  }).then((res: any) => res.json());
+  }).then((res: any) => res.json())) as NotionRedirectResponse;
 
   if (!notionResponse?.access_token) return res.end("Login Failed");
   //   await app.client.chat.postEphemeral({
@@ -42,9 +45,10 @@ export const redirectHandler: CustomRoute["handler"] = async (req, res) => {
   const notion = new NotionClient(notionResponse.access_token);
   const database_id = await notion.getUserNotionDB();
 
-  db.set(state.u, {
-    access_token: notionResponse.access_token,
-    database_id,
+  await dbv2.addUser({
+    notion_access_token: notionResponse.access_token,
+    notion_database_id: database_id,
+    slack_user_id: state.u,
   });
 
   res.end(

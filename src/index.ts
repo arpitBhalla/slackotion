@@ -2,7 +2,7 @@ import { App, LogLevel } from "@slack/bolt";
 import { env } from "./core/env";
 import { app_mention } from "./events/app_mention";
 import { middleware } from "./middleware";
-import { redirectHandler } from "./routes/redirect";
+import { notionRedirectHandler } from "./routes/redirect-notion";
 
 const app = new App({
   token: env.token,
@@ -18,7 +18,7 @@ const app = new App({
       path: "/",
     },
     {
-      handler: redirectHandler,
+      handler: notionRedirectHandler,
       method: "GET",
       path: "/redirect",
     },
