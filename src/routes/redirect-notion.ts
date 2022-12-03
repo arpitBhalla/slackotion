@@ -1,7 +1,7 @@
 import { env } from "../core/env";
 import { CustomRoute } from "@slack/bolt";
 import fetch from "node-fetch";
-import { dbv2 } from "../utils/db";
+import { prisma } from "../utils/prisma";
 import { NotionClient } from "../utils/notion";
 import { NotionRedirectResponse, NotionLoginStatePayload } from "../types";
 
@@ -51,7 +51,7 @@ export const notionRedirectHandler: CustomRoute["handler"] = async (
   const notion = new NotionClient(notionResponse.access_token);
   const database_id = await notion.getUserNotionDB();
 
-  await dbv2.addUser({
+  await prisma.addUser({
     notion_access_token: notionResponse.access_token,
     notion_database_id: database_id,
     slack_user_id: state.u,

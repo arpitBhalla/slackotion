@@ -11,9 +11,9 @@ datasource db {
 }
 
 model Team {
-  id            Int    @id @default(autoincrement())
-  slack_team_id String @unique
-  slack_bot_id  String
+  id              Int    @id @default(autoincrement())
+  slack_team_id   String @unique
+  slack_meta_data Json   @default("{}")
 }
 
 model User {

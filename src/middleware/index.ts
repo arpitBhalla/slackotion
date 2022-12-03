@@ -3,7 +3,7 @@ import { WebClient } from "@slack/web-api";
 import { StringIndexed } from "@slack/bolt/dist/types/helpers";
 import { env } from "../core/env";
 import { NotionLoginStatePayload } from "../types";
-import { dbv2 } from "../utils/db";
+import { prisma } from "../utils/prisma";
 
 const app_mention: Middleware<
   SlackEventMiddlewareArgs<"app_mention">,
@@ -30,7 +30,7 @@ const checkAuth = async function (
   { user = "", thread_ts = "", channel = "" },
   client: WebClient
 ) {
-  const notionMetadata = await dbv2.getUser(user);
+  const notionMetadata = await prisma.getUser(user);
 
   if (notionMetadata?.notion_access_token) {
     return {

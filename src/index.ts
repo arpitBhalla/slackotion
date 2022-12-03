@@ -3,7 +3,6 @@ import { env } from "./core/env";
 import { app_mention } from "./events/app_mention";
 import { middleware } from "./middleware";
 import { notionRedirectHandler } from "./routes/redirect-notion";
-import { slackRedirectHandler } from "./routes/redirect-slack";
 
 import { SlackInstallationStore } from "./utils/slack-installation";
 
@@ -14,8 +13,9 @@ export const app = new App({
   clientSecret: env.slack_client_secret,
   scopes: ["app_mentions:read", "channels:history", "chat:write"],
   logLevel: env.isDebug ? LogLevel.DEBUG : LogLevel.ERROR,
-  stateSecret: "arpit",
+  stateSecret: "",
   installationStore: new SlackInstallationStore(),
+  installerOptions: { directInstall: true, stateVerification: false },
   customRoutes: [
     {
       handler(req, res) {
@@ -28,11 +28,6 @@ export const app = new App({
       handler: notionRedirectHandler,
       method: "GET",
       path: "/redirect-notion",
-    },
-    {
-      handler: slackRedirectHandler,
-      method: "GET",
-      path: "/redirect-slack",
     },
   ],
 });
