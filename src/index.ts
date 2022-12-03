@@ -1,12 +1,6 @@
-// @ts-nocheck
-
 import { App, LogLevel } from "@slack/bolt";
-import { env } from "./core";
-// @ts-ignore
-import fetch from "node-fetch";
-import { db } from "./dbData";
-
-import { Client } from "@notionhq/client";
+import { env } from "./core/env";
+import { db } from "./utils/db";
 
 const app = new App({
   token: env.token,
@@ -153,14 +147,20 @@ app.event("app_mention", async ({ event, context, client, say }) => {
   const notion = new Client({ auth: context.notion.access_token });
 
   notion.pages.create({
-    // parent: { database_id: context.notion.workspace_id },
-    content: [
-      {
-        paragraph: {
-          rich_text: [{ text: { content: "de" } }],
-        },
+    parent: { database_id: context.notion.workspace_id },
+    properties: {
+      ID: {
+        type: "title",
+        title: [
+          {
+            type: "text",
+            text: {
+              content: "username",
+            },
+          },
+        ],
       },
-    ],
+    },
   });
 
   client.chat.postEphemeral({

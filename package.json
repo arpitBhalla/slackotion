@@ -13,6 +13,7 @@
     "node-fetch": "2"
   },
   "devDependencies": {
+    "ngrok": "^4.3.3",
     "ts-node": "^10.9.1"
   }
 }
