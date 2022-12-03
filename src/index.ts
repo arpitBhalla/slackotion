@@ -11,6 +11,13 @@ const app = new App({
   logLevel: env.isDebug ? LogLevel.DEBUG : LogLevel.ERROR,
   customRoutes: [
     {
+      handler(req, res) {
+        res.end("working");
+      },
+      method: "GET",
+      path: "/",
+    },
+    {
       handler: redirectHandler,
       method: "GET",
       path: "/redirect",
