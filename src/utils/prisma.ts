@@ -49,6 +49,15 @@ class prismaDb extends PrismaClient {
       },
     });
   }
+  async deleteUser(user_id: string) {
+    const user = await this.getUser(user_id);
+    if (!user) return;
+    return this.user.delete({
+      where: {
+        id: user.id,
+      },
+    });
+  }
 }
 
 export const prisma = new prismaDb();

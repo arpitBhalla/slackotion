@@ -4,6 +4,7 @@ import fetch from "node-fetch";
 import { prisma } from "../utils/prisma";
 import { NotionClient } from "../utils/notion";
 import { NotionRedirectResponse, NotionLoginStatePayload } from "../types";
+import { app } from "./../index";
 
 export const notionRedirectHandler: CustomRoute["handler"] = async (
   req,
@@ -41,12 +42,12 @@ export const notionRedirectHandler: CustomRoute["handler"] = async (
   }).then((res: any) => res.json())) as NotionRedirectResponse;
 
   if (!notionResponse?.access_token) return res.end("Login Failed");
-  //   await app.client.chat.postEphemeral({
-  //     text: "Login done, you can use the app now",
-  //     thread_ts: state.t,
-  //     channel: state.c,
-  //     user: state.u,
-  //   });
+  await app.client.chat.postEphemeral({
+    text: "Login done, you can use the app now",
+    channel: state.u,
+    user: state.u,
+    // thread_ts: state.t,
+  });
 
   const notion = new NotionClient(notionResponse.access_token);
   const database_id = await notion.getUserNotionDB();
