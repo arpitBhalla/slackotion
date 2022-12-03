@@ -1,29 +1,43 @@
-import { AllMiddlewareArgs, AnyMiddlewareArgs } from "@slack/bolt";
+import { Middleware, SlackEventMiddlewareArgs } from "@slack/bolt";
+import { WebClient } from "@slack/web-api";
 import { StringIndexed } from "@slack/bolt/dist/types/helpers";
 import { env } from "../core/env";
-import { MiddlewareBody, StatePayload } from "../types";
+import { StatePayload } from "../types";
 import { db } from "../utils/db";
 
-export const auth_middleware = async function ({
-  body,
-  client,
-  context,
-  next,
-}: AnyMiddlewareArgs & AllMiddlewareArgs<StringIndexed>): Promise<void> {
-  const { event } = body as unknown as MiddlewareBody;
+const app_mention: Middleware<
+  SlackEventMiddlewareArgs<"app_mention">,
+  StringIndexed
+> = async ({ event, next, context }) => {
+  const authRes = await checkAuth(
+    { user: event.user, channel: event.channel, thread_ts: event.thread_ts },
+    context.client
+  );
+  if (authRes?.notion_access_token) {
+    context.notion_access_token = authRes.notion_access_token;
+    context.notion_database_id = authRes.notion_database_id;
+    return next();
+  }
+  return;
+};
 
-  const { user, channel, thread_ts } = event;
+export const middleware = {
+  app_mention,
+};
 
-  if (!user) return;
-
+const checkAuth = async function (
+  { user = "", thread_ts = "", channel = "" },
+  client: WebClient
+) {
   const notionMetadata = db.get(user);
 
   if (notionMetadata?.access_token) {
-    context.notion_access_token = notionMetadata.access_token;
-    context.notion_database_id = notionMetadata.database_id;
-
-    return next();
+    return {
+      notion_access_token: notionMetadata.access_token,
+      notion_database_id: notionMetadata.database_id,
+    };
   }
+
   const payload: StatePayload = { u: user, t: thread_ts, c: channel };
   const redirectURL = new URL(env.auth_base_url!);
   redirectURL.searchParams.set("client_id", env.auth_client_id!);

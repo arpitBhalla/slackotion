@@ -1,5 +1,6 @@
 import { Middleware, SlackEventMiddlewareArgs } from "@slack/bolt";
 import { StringIndexed } from "@slack/bolt/dist/types/helpers";
+
 import { NotionClient } from "../utils/notion";
 
 export const app_mention: Middleware<
