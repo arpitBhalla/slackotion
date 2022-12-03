@@ -9,6 +9,7 @@ const app_mention: Middleware<
   SlackEventMiddlewareArgs<"app_mention">,
   StringIndexed
 > = async ({ event, next, context, client }) => {
+  console.log(event.type);
   const authRes = await checkAuth(
     { user: event.user, channel: event.channel, thread_ts: event.thread_ts },
     client
@@ -45,7 +46,10 @@ const checkAuth = async function (
   };
   const redirectURL = new URL(env.notion_auth_base_url!);
   redirectURL.searchParams.set("client_id", env.notion_client_id!);
-  redirectURL.searchParams.set("redirect_uri", env.base_url + "/redirect");
+  redirectURL.searchParams.set(
+    "redirect_uri",
+    env.base_url + "/redirect-notion"
+  );
   redirectURL.searchParams.set("response_type", "code");
   redirectURL.searchParams.set(
     "state",

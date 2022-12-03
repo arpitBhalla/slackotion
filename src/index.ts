@@ -3,12 +3,19 @@ import { env } from "./core/env";
 import { app_mention } from "./events/app_mention";
 import { middleware } from "./middleware";
 import { notionRedirectHandler } from "./routes/redirect-notion";
+import { slackRedirectHandler } from "./routes/redirect-slack";
 
-const app = new App({
-  token: env.slack_bot_token,
+import { SlackInstallationStore } from "./utils/slack-installation";
+
+export const app = new App({
   appToken: env.slack_app_token,
   signingSecret: env.slack_signing_secret,
+  clientId: env.slack_client_id,
+  clientSecret: env.slack_client_secret,
+  scopes: ["app_mentions:read", "channels:history", "chat:write"],
   logLevel: env.isDebug ? LogLevel.DEBUG : LogLevel.ERROR,
+  stateSecret: "arpit",
+  installationStore: new SlackInstallationStore(),
   customRoutes: [
     {
       handler(req, res) {
@@ -20,7 +27,12 @@ const app = new App({
     {
       handler: notionRedirectHandler,
       method: "GET",
-      path: "/redirect",
+      path: "/redirect-notion",
+    },
+    {
+      handler: slackRedirectHandler,
+      method: "GET",
+      path: "/redirect-slack",
     },
   ],
 });

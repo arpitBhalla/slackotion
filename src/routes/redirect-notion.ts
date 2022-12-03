@@ -12,19 +12,25 @@ export const notionRedirectHandler: CustomRoute["handler"] = async (
   const params = new URLSearchParams(req.url?.split("?")[1]);
   console.log("/redirect", params);
 
-  const stateBuffer = Buffer.from(params.get("state") ?? "", "base64").toString(
-    "ascii"
-  );
+  const stateParam = params.get("state") ?? "";
+  const codeParam = params.get("code") ?? "";
+
+  if (!stateParam || !codeParam) {
+    res.statusCode = 400;
+    res.end("Invalid request");
+    return;
+  }
+
+  const stateBuffer = Buffer.from(stateParam, "base64").toString("ascii");
 
   const state = JSON.parse(stateBuffer) as NotionLoginStatePayload;
-  const code = params.get("code")!;
 
   const notionResponse = (await fetch("https://api.notion.com/v1/oauth/token", {
     method: "POST",
     body: JSON.stringify({
       grant_type: "authorization_code",
-      code,
-      redirect_uri: env.base_url + "/redirect",
+      code: codeParam,
+      redirect_uri: env.base_url + "/redirect-notion",
     }),
     headers: {
       "Content-Type": "application/json",

@@ -1,10 +1,9 @@
 import { env } from "../core/env";
 import { CustomRoute } from "@slack/bolt";
-import fetch from "node-fetch";
-import { NotionClient } from "../utils/notion";
-import { SlackRedirectResponse } from "../types";
+import { dbv2 } from "../utils/db";
+import { app } from "../index";
 
-export const notionRedirectHandler: CustomRoute["handler"] = async (
+export const slackRedirectHandler: CustomRoute["handler"] = async (
   req,
   res
 ) => {
@@ -12,33 +11,24 @@ export const notionRedirectHandler: CustomRoute["handler"] = async (
   console.log("/redirect-slack", params);
 
   const code = params.get("code")!;
+  const resp = await app.client.oauth.v2.access({
+    code,
+    client_id: env.slack_client_id!,
+    client_secret: env.slack_client_secret!,
+    redirect_uri: env.base_url + "/redirect-slack",
+  });
+  console.log(resp);
 
-  const response = (await fetch("https://slack.com/api/oauth.access", {
-    method: "POST",
-    body: JSON.stringify({
-      code,
-      client_id: env.notion_client_id,
-      client_secret: env.notion_client_secret,
-      redirect_uri: env.base_url + "/redirect-slack",
-    }),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Basic ${Buffer.from(
-        `${env.notion_client_id}:${env.notion_client_secret}`
-      ).toString("base64")}`,
-    },
-  }).then((res: any) => res.json())) as SlackRedirectResponse;
+  if (!resp.ok) {
+    res.statusCode = 400;
+    res.end("Failed to authenticate with Slack. Please try again later.");
+    return;
+  }
 
-  if (!response?.access_token) return res.end("Login Failed");
-  //   await app.client.chat.postEphemeral({
-  //     text: "Login done, you can use the app now",
-  //     thread_ts: state.t,
-  //     channel: state.c,
-  //     user: state.u,
-  //   });
-
-  const notion = new NotionClient(response.access_token);
-  const database_id = await notion.getUserNotionDB();
+  await dbv2.addTeam({
+    slack_bot_id: resp.access_token!,
+    slack_team_id: resp.team?.id!,
+  });
 
   res.end(
     "<html><head><title>Sync with Slack</title></head><body><center><h1>App added successfully</h1><h3>You can close this tab</h3></center></body></html>"

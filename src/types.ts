@@ -7,22 +7,6 @@ declare module "@slack/bolt" {
   }
 }
 
-export type SlackRedirectResponse = {
-  access_token: string;
-  scope: string;
-  team_name: string;
-  team_id: string;
-  incoming_webhook: {
-    url: string;
-    channel: string;
-    configuration_url: string;
-  };
-  bot: {
-    bot_user_id: string;
-    bot_access_token: string;
-  };
-};
-
 export type NotionRedirectResponse = {
   access_token: string;
   token_type: string;
