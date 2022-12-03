@@ -1,6 +1,9 @@
 <center>
+
 <img src='assets/icon-512.png' width=60/>
+
 <h1>Sync Slacktion</h1>
+
 </center>
 
 ## Usage

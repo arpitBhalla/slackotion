@@ -6,3 +6,4 @@ db.json
 
 .env.dev
 .env.prod
+.DS_Store
