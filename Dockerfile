@@ -6,7 +6,7 @@ COPY .env .env
 
 RUN yarn
 RUN yarn add typescript
-RUN tsc
+RUN npx tsc
 
 ENV PORT=80
 
