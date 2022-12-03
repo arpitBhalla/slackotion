@@ -14,10 +14,9 @@ Save Slack threads🧵 to Notion
 
 ### Mention the bot
 
-<img width="527" alt="image" src="https://user-images.githubusercontent.com/55053424/205465264-db075661-6435-46e9-8f8f-7518d526aa12.png">
+<img width="547" alt="image" src="https://user-images.githubusercontent.com/55053424/205466491-ba64e975-874a-4f3a-8918-e0c7f198c690.png">
 
-
-<img width="340" alt="image" src="https://user-images.githubusercontent.com/55053424/205465244-c64dddee-cc16-48c3-ae74-d1b0acc9e0ec.png">
+<img width="350" alt="image" src="https://user-images.githubusercontent.com/55053424/205466469-6a9b55ba-f212-4e93-9e65-aa2f34b75fdd.png">
 
 
 ### Commands
@@ -25,9 +24,7 @@ Save Slack threads🧵 to Notion
 #### `/select`
 
 Updates the default notion database location
-
-<img width="407" alt="image" src="https://user-images.githubusercontent.com/55053424/205465168-db1169e4-b51e-4c4b-9e99-7bb397d2dc6b.png">
-
+<img width="607" alt="image" src="https://user-images.githubusercontent.com/55053424/205466519-cbbbd586-44f6-40b2-b8b8-e87cd9ba76ee.png">
 
 #### `/logout`
 Remove all token/data of notion
