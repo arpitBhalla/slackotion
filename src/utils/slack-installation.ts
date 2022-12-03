@@ -35,7 +35,7 @@ export class SlackInstallationStore implements InstallationStore {
       installation.enterprise !== undefined
     ) {
       // support for org wide app installation
-      return await database.set(installation.enterprise.id, installation);
+      return database.set(installation.enterprise.id, installation);
     }
     if (installation.team !== undefined) {
       // single team app installation
@@ -48,7 +48,7 @@ export class SlackInstallationStore implements InstallationStore {
     installQuery
   ) => {
     // change the line below so it fetches from your database
-    console.log(installQuery);
+    console.log("fetch", installQuery);
     if (
       installQuery.isEnterpriseInstall &&
       installQuery.enterpriseId !== undefined

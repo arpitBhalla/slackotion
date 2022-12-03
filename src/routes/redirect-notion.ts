@@ -1,7 +1,7 @@
 import { env } from "../core/env";
 import { CustomRoute } from "@slack/bolt";
 import fetch from "node-fetch";
-import { db, dbv2 } from "../utils/db";
+import { dbv2 } from "../utils/db";
 import { NotionClient } from "../utils/notion";
 import { NotionRedirectResponse, NotionLoginStatePayload } from "../types";
 

@@ -3,7 +3,7 @@ import { WebClient } from "@slack/web-api";
 import { StringIndexed } from "@slack/bolt/dist/types/helpers";
 import { env } from "../core/env";
 import { NotionLoginStatePayload } from "../types";
-import { db, dbv2 } from "../utils/db";
+import { dbv2 } from "../utils/db";
 
 const app_mention: Middleware<
   SlackEventMiddlewareArgs<"app_mention">,
