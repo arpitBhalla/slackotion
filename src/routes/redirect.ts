@@ -2,6 +2,8 @@ import { env } from "../core/env";
 import { CustomRoute } from "@slack/bolt";
 import fetch from "node-fetch";
 import { db } from "../utils/db";
+import { NotionClient } from "../utils/notion";
+import { StatePayload } from "../types";
 
 export const redirectHandler: CustomRoute["handler"] = async (req, res) => {
   const params = new URLSearchParams(req.url?.split("?")[1]);
@@ -11,7 +13,7 @@ export const redirectHandler: CustomRoute["handler"] = async (req, res) => {
     "ascii"
   );
 
-  const state = JSON.parse(stateBuffer);
+  const state = JSON.parse(stateBuffer) as StatePayload;
   const code = params.get("code")!;
 
   const notionResponse = await fetch("https://api.notion.com/v1/oauth/token", {
@@ -29,7 +31,7 @@ export const redirectHandler: CustomRoute["handler"] = async (req, res) => {
     },
   }).then((res: any) => res.json());
 
-  //   if (!notionResponse?.access_token) return res.end("Login Failed");
+  if (!notionResponse?.access_token) return res.end("Login Failed");
   //   await app.client.chat.postEphemeral({
   //     text: "Login done, you can use the app now",
   //     thread_ts: state.t,
@@ -37,8 +39,13 @@ export const redirectHandler: CustomRoute["handler"] = async (req, res) => {
   //     user: state.u,
   //   });
 
-  console.log(notionResponse);
-  db.set(state.u, notionResponse);
+  const notion = new NotionClient(notionResponse.access_token);
+  const database_id = await notion.getUserNotionDB();
+
+  db.set(state.u, {
+    access_token: notionResponse.access_token,
+    database_id,
+  });
 
   res.end(
     "<html><head><title>Sync with Slack</title></head><body><center><h1>App added successfully</h1><h3>You can close this tab</h3></center></body></html>"

@@ -1,5 +1,10 @@
 import fs from "fs";
 
+type DB = {
+  access_token: string;
+  database_id: string;
+};
+
 export const db = {
   read() {
     return JSON.parse(fs.readFileSync("db.json", "utf8"));
@@ -7,12 +12,12 @@ export const db = {
   write(data: any) {
     fs.writeFileSync("db.json", JSON.stringify(data));
   },
-  set(key = "", value: any) {
+  set(key: string, value: DB) {
     const dbData = this.read();
     dbData[key] = value;
     this.write(dbData);
   },
-  get(key = "") {
-    return this.read()[key];
+  get(key: string): DB {
+    return this.read()[key] || {};
   },
 };

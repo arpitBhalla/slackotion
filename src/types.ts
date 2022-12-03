@@ -23,3 +23,25 @@ declare module "@slack/bolt" {
     isLogin: boolean;
   }
 }
+
+export type MiddlewareBody = {
+  token: string;
+  team_id: string;
+  api_app_id: string;
+  event: {
+    client_msg_id: string;
+    type: string;
+    text: string;
+    user: string;
+    ts: string;
+    blocks: ArrayConstructor[];
+    team: string;
+    thread_ts: string;
+    parent_user_id: string;
+    channel: string;
+    event_ts: string;
+  };
+  event_context: string;
+};
+
+export type StatePayload = { u: string; t: string; c: string };
