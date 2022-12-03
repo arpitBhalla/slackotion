@@ -23,24 +23,9 @@ export const app_mention: Middleware<
     ts: thread_ts,
     channel,
   });
-  const notion = new NotionClient(context.notion.access_token);
+  const notion = new NotionClient(context.notion_access_token);
 
-  notion.pages.create({
-    parent: { database_id: context.notion.workspace_id },
-    properties: {
-      ID: {
-        type: "title",
-        title: [
-          {
-            type: "text",
-            text: {
-              content: "username",
-            },
-          },
-        ],
-      },
-    },
-  });
+  notion.createNotionPage(context.notion_database_id);
 
   client.chat.postEphemeral({
     channel,

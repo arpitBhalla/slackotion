@@ -1,5 +1,12 @@
 import "@slack/bolt";
 
+declare module "@slack/bolt" {
+  interface Context {
+    notion_access_token: string;
+    notion_database_id: string;
+  }
+}
+
 export type NotionResponse = {
   access_token: string;
   token_type: string;
@@ -16,13 +23,6 @@ export type NotionResponse = {
   };
   duplicated_template_id: any;
 };
-
-declare module "@slack/bolt" {
-  interface Context {
-    notion: NotionResponse;
-    isLogin: boolean;
-  }
-}
 
 export type MiddlewareBody = {
   token: string;

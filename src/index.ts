@@ -1,11 +1,4 @@
-import {
-  AllMiddlewareArgs,
-  AnyMiddlewareArgs,
-  App,
-  LogLevel,
-  Middleware,
-} from "@slack/bolt";
-import { StringIndexed } from "@slack/bolt/dist/types/helpers";
+import { App, LogLevel } from "@slack/bolt";
 import { env } from "./core/env";
 import { app_mention } from "./events/app_mention";
 import { auth_middleware } from "./middleware/auth";

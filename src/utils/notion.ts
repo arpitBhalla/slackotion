@@ -9,6 +9,7 @@ export class NotionClient extends Client {
     const res = await this.search({
       filter: { property: "object", value: "database" },
     });
+
     return res.results[0].id;
   }
   async createNotionPage(database_id: string) {
