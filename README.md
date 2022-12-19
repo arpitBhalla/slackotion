@@ -1,6 +1,6 @@
 <p align="center">
 <img src='assets/icon-512.png' width=80/>
-<h1 align="center">Sync Slacktion</h1>
+<h1 align="center">Slackotion</h1>
 </p>
 <h6 align="center">
 Save Slack threads🧵 to Notion
